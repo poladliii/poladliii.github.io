@@ -1,16 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Web Page</title>
+    <title>Мои ссылки</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px; /* Увеличенный шрифт для имени */
+            letter-spacing: 1px;
+        }
+        .bio {
+            color: #b3b3b3;
+            font-size: 15px;
+            margin: 10px 0 30px 0;
+            line-height: 1.4;
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .link-btn {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+        }
+        .link-btn:hover {
+            background-color: #6200ea;
+            border-color: #6200ea;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Riad Poladli</h1>
+        
 
-    <h1>Welcome to My Website</h1>
-    <p>This is a simple paragraph of text on a basic HTML page.</p>
-    
-    <a href="https://example.com">Click here to visit a link</a>
-
+        <div class="links">
+            <!-- Вставьте нужные ссылки между кавычками в href="" -->
+            <a href="https://t.me/bdutrackerbot" class="link-btn">Telegram Bot для студентов BDU</a>
+            <a href="https://t.me/wkilmii" class="link-btn">Мой Telegram</a>
+            <a href="https://www.instagram.com/poladliii/" class="link-btn">Мой Instagram</a>
+        </div>
+    </div>
 </body>
 </html>
