@@ -60,7 +60,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .lang-ru { display: none; } /* По умолчанию скрыт русский */
+        .lang-ru { display: none; }
     </style>
 </head>
 <body>
@@ -74,12 +74,10 @@
             </h1>
             
             <div class="flex items-center gap-3">
-                <!-- Переключатель языка -->
                 <div class="flex bg-gray-500/10 p-1 rounded-lg">
                     <button onclick="setLang('az')" id="btn-az" class="px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white">AZ</button>
                     <button onclick="setLang('ru')" id="btn-ru" class="px-2 py-1 rounded-md text-xs font-bold text-gray-500">RU</button>
                 </div>
-                <!-- Кнопка Добавить -->
                 <button onclick="showScreen('screen-add')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--btn-color); color: var(--btn-text);">
                     <i class="fa-solid fa-plus"></i>
                 </button>
@@ -110,12 +108,18 @@
                 <label class="block text-sm font-semibold mb-2 opacity-80">
                     <span class="lang-az">Saatlar</span><span class="lang-ru">Часы</span>
                 </label>
+                
+                <!-- ДОБАВЛЕНЫ КНОПКИ 90, 105, 120 -->
                 <div class="grid grid-cols-4 gap-2 mb-2">
                     <button onclick="document.getElementById('add-hours').value=30" class="tg-card py-2 text-sm font-bold text-center active:scale-95">30</button>
                     <button onclick="document.getElementById('add-hours').value=45" class="tg-card py-2 text-sm font-bold text-center active:scale-95">45</button>
                     <button onclick="document.getElementById('add-hours').value=60" class="tg-card py-2 text-sm font-bold text-center active:scale-95">60</button>
                     <button onclick="document.getElementById('add-hours').value=75" class="tg-card py-2 text-sm font-bold text-center active:scale-95">75</button>
+                    <button onclick="document.getElementById('add-hours').value=90" class="tg-card py-2 text-sm font-bold text-center active:scale-95">90</button>
+                    <button onclick="document.getElementById('add-hours').value=105" class="tg-card py-2 text-sm font-bold text-center active:scale-95">105</button>
+                    <button onclick="document.getElementById('add-hours').value=120" class="tg-card py-2 text-sm font-bold text-center active:scale-95">120</button>
                 </div>
+                
                 <input type="number" id="add-hours" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="və ya əllə daxil edin / или вручную...">
             </div>
             <button onclick="saveSubject()" class="w-full py-4 rounded-xl font-bold mt-4 shadow-lg active:scale-95 transition-transform" style="background-color: var(--btn-color); color: var(--btn-text);">
@@ -175,7 +179,6 @@
                 <input type="number" id="inp-indep" class="w-16 text-center py-1 rounded-lg tg-input font-bold" oninput="updateGrades()">
             </div>
             
-            <!-- Семинары (Текст) -->
             <div class="tg-card !py-3 !mb-0">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-semibold">
@@ -185,7 +188,6 @@
                 <input type="text" id="inp-sem" class="w-full px-3 py-2 rounded-lg tg-input font-bold text-sm" placeholder="Məs / Напр: 9 10 8" oninput="updateGrades()">
             </div>
 
-            <!-- Коллоквиумы (Текст) -->
             <div class="tg-card !py-3 !mb-0">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-semibold">
@@ -195,7 +197,6 @@
                 <input type="text" id="inp-col" class="w-full px-3 py-2 rounded-lg tg-input font-bold text-sm" placeholder="Məs / Напр: 10 9" oninput="updateGrades()">
             </div>
 
-            <!-- Итог по Семинарам и Коллоквиумам (Автоматический) -->
             <div class="flex justify-between items-center px-4 py-2 bg-blue-500/10 rounded-lg text-blue-500">
                 <span class="text-xs font-bold">
                     <span class="lang-az">Seminar + Kollokvium Yekun:</span><span class="lang-ru">Итог Семинар + Колл:</span>
@@ -221,37 +222,24 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-\        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    input.blur(); 
-                }
-            });
-        });
-
-        // 1. Управление языком
         let currentLang = localStorage.getItem('bdu_lang') || 'az';
 
         function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('bdu_lang', lang);
             
-            // Управление стилями кнопок
             document.getElementById('btn-az').className = lang === 'az' ? 'px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white' : 'px-2 py-1 rounded-md text-xs font-bold text-gray-500 bg-transparent';
             document.getElementById('btn-ru').className = lang === 'ru' ? 'px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white' : 'px-2 py-1 rounded-md text-xs font-bold text-gray-500 bg-transparent';
             
-            // Показ/скрытие текста
             document.querySelectorAll('.lang-az').forEach(el => el.style.display = lang === 'az' ? 'inline' : 'none');
             document.querySelectorAll('.lang-ru').forEach(el => el.style.display = lang === 'ru' ? 'inline' : 'none');
             
             renderHome();
         }
 
-        // Загружаем базу
         let subjects = JSON.parse(localStorage.getItem('bdu_subjects')) || [];
         let currentSubjId = null;
 
-        // Расчет пропусков
         function calcMaxSkips(hours) {
             if (hours === 120) return 14; if (hours === 105) return 13; if (hours === 90) return 11;
             if (hours === 75) return 9; if (hours === 60) return 7; if (hours === 45) return 5;
@@ -267,7 +255,6 @@
             return 8;
         }
 
-        // РАСЧЕТ СЕМИНАРОВ И КОЛЛОКВИУМОВ (Автоматически из строки)
         function calcSemColScore(semStr, colStr) {
             let semGrades = (semStr || "").match(/\d+/g) || [];
             let colGrades = (colStr || "").match(/\d+/g) || [];
@@ -381,7 +368,6 @@
         function updateGrades() {
             let sub = subjects.find(s => s.id === currentSubjId);
             
-            // Защита от дурака для цифр
             let indep = parseInt(document.getElementById('inp-indep').value) || 0;
             let exam = parseInt(document.getElementById('inp-exam').value) || 0;
             if (indep > 10) indep = 10;
@@ -405,7 +391,6 @@
             let attScore = calcAttendScore(sub.hours, sub.skips, sub.maxSkips);
             let semColScore = calcSemColScore(sub.sem_grades, sub.col_grades);
             
-            // Вывод счета за семинары и коллоквиумы
             document.getElementById('det-semcol-score').innerText = semColScore.toFixed(1) + ' / 30';
 
             let sessionRaw = (sub.indep || 0) + semColScore + attScore;
@@ -443,10 +428,15 @@
             });
         }
 
-        // Инициализация языка при старте
-        setLang(currentLang);
-        
+        // --- ГЛОБАЛЬНЫЙ ПЕРЕХВАТЧИК ДЛЯ СКРЫТИЯ КЛАВИАТУРЫ ---
+        // Сработает на абсолютно любом поле ввода при нажатии Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName.toLowerCase() === 'input') {
+                e.target.blur(); // Мгновенно скрывает клавиатуру
+            }
+        });
 
+        setLang(currentLang);
     </script>
 </body>
 </html>
