@@ -1,363 +1,180 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BDU Tracker Bot | Tələbə Köməkçisi</title>
-    
-    <link rel="icon" href="https://api.iconify.design/fluent-emoji-flat:graduation-cap.svg" type="image/svg+xml">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        bg: '#090E17',
-                        card: '#121A2F',
-                        border: '#1F2937',
-                        primary: '#2563EB',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            background-color: #090E17;
-            color: #F8FAFC;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-        }
-        
-        .feature-card {
-            background-color: #121A2F;
-            border: 1px solid #1F2937;
-            border-radius: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        @media (min-width: 1024px) {
-            .feature-card:hover {
-                border-color: #374151;
-                transform: translateY(-4px);
-            }
-        }
-
-        .widget {
-            background: linear-gradient(180deg, #121A2F 0%, #0B111F 100%);
-            border: 1px solid #1F2937;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .btn-tg {
-            background: linear-gradient(90deg, #2563EB, #0ea5e9);
-            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
-        }
-        .btn-tg:hover {
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.23);
-        }
-
-        /* Анимация раскрытия FAQ */
-        .faq-content {
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        .faq-content.show {
-            max-height: 200px;
-            opacity: 1;
-        }
-        .faq-icon {
-            transition: transform 0.3s ease;
-        }
-        .faq-icon.rotate {
-            transform: rotate(45deg);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090E17">
+<title>BDU Tracker | Şəxsi Akademik Köməkçi</title>
+<link rel="icon" href="https://api.iconify.design/fluent-emoji-flat:graduation-cap.svg">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']},colors:{primary:'#2563EB'}}}}</script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth}body{margin:0;background:#090E17;color:#F8FAFC;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}.card{background:#121A2F;border:1px solid #1F2937;border-radius:16px}.widget{background:linear-gradient(180deg,#121A2F,#0B111F);border:1px solid #1F2937;box-shadow:0 20px 40px #0006}.btn{background:linear-gradient(90deg,#2563EB,#0ea5e9);box-shadow:0 4px 14px #2563eb4d;transition:.2s}.faq{max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s}.faq.show{max-height:300px;opacity:1}.icon{transition:.25s}.icon.rotate{transform:rotate(45deg)}.safe{padding-bottom:calc(12px + env(safe-area-inset-bottom))}@media(min-width:768px){.btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px #2563eb40}.card{transition:.25s}.card:hover{transform:translateY(-4px);border-color:#374151}}@media(hover:none){.card:hover{transform:none}}
+</style>
 </head>
-<body class="min-h-screen flex flex-col relative pb-24 md:pb-0 pt-20">
 
+<body class="min-h-screen">
 
-    <nav class="fixed top-0 w-full z-50 bg-[#090E17]/90 backdrop-blur-md border-b border-white/5 transition-all">
-        <div class="max-w-6xl mx-auto px-4 md:px-8">
-            <div class="flex justify-between items-center h-16 md:h-20">
-                <div class="flex items-center gap-2 md:gap-3">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
-                        <i class="fa-solid fa-graduation-cap text-white text-sm md:text-lg"></i>
-                    </div>
-                    <span class="font-bold text-lg md:text-xl tracking-tight text-white">BDU<span class="text-blue-500">Tracker</span></span>
-                </div>
-                
-                <div class="flex items-center gap-3 md:gap-4">
-                    <div class="flex bg-[#121A2F] p-1 rounded-lg border border-[#1F2937]">
-                        <button id="lang-az" onclick="setLang('az')" class="px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-all bg-[#1F2937] text-white shadow-sm">AZ</button>
-                        <button id="lang-ru" onclick="setLang('ru')" class="px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-all text-gray-400 hover:text-white bg-transparent border border-transparent">RU</button>
-                    </div>
-                    <a href="https://t.me/bdutrackerbot" target="_blank" class="hidden md:inline-flex items-center gap-2 btn-tg text-white px-5 py-2.5 rounded-lg font-semibold transition-all hover:-translate-y-0.5">
-                        <i class="fa-brands fa-telegram text-lg"></i>
-                        <span class="lang-az">Bota Keçid Et</span>
-                        <span class="lang-ru hidden">Перейти в Бота</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+<nav class="fixed top-0 left-0 right-0 z-50 bg-[#090E17]/90 backdrop-blur-xl border-b border-white/5">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="h-16 md:h-20 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-blue-500/20"><i class="fa-solid fa-graduation-cap"></i></div>
+<span class="font-bold text-base md:text-xl">BDU<span class="text-blue-500">Tracker</span></span>
+</div>
+<div class="flex items-center gap-2.5 md:gap-4">
+<div class="flex bg-[#121A2F] p-1 rounded-lg border border-[#1F2937]">
+<button id="lang-az" onclick="setLang('az')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-[#1F2937] text-white">AZ</button>
+<button id="lang-ru" onclick="setLang('ru')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-gray-400">RU</button>
+</div>
+<a href="https://t.me/bdutrackerbot" target="_blank" class="hidden md:inline-flex items-center gap-2 btn text-white px-5 py-2.5 rounded-lg font-semibold text-sm"><i class="fa-brands fa-telegram"></i><span class="lang-az">Tətbiqi Aç</span><span class="lang-ru hidden">Открыть Web App</span></a>
+</div>
+</div>
+</div>
+</nav>
 
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 md:pt-32 md:pb-20">
+<div class="grid lg:grid-cols-2 gap-8 lg:gap-14 items-center">
 
-    <main class="flex-grow flex flex-col lg:flex-row items-center justify-center max-w-6xl mx-auto px-4 md:px-8 pt-6 md:pt-20 pb-12 gap-10 md:gap-12">
-        <div class="w-full lg:w-1/2 text-center lg:text-left mt-4 md:mt-0">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-[10px] md:text-xs font-semibold text-blue-400 mb-6 border border-blue-500/20 uppercase tracking-wide">
-                <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span class="lang-az">BDU Tələbələri üçün</span>
-                <span class="lang-ru hidden">Для студентов БГУ</span>
-            </div>
+<div class="text-center lg:text-left">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-[10px] sm:text-xs font-semibold text-blue-400 border border-blue-500/20 mb-5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span><span class="lang-az">Telegram Mini App • BDU Tələbələri</span><span class="lang-ru hidden">Telegram Mini App • Для студентов БГУ</span></div>
 
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 md:mb-6 text-white tracking-tight leading-tight">
-                <span class="lang-az">Qaibləri unut, <br class="hidden sm:block" />ballarına <span class="text-blue-500">hökm et.</span></span>
-                <span class="lang-ru hidden">Забудь про пропуски, <br class="hidden sm:block" />управляй <span class="text-blue-500">баллами.</span></span>
-            </h1>
-            
-            <p class="text-base md:text-lg text-gray-400 mb-8 md:mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0 px-2 md:px-0">
-                <span class="lang-az">Seminar, kollokvium və imtahan nəticələrini bir yerdə toplayın. Fənnin saatına uyğun qaib limitinizi avtomatik hesablayın.</span>
-                <span class="lang-ru hidden">Собирайте оценки за семинары, коллоквиумы и экзамены. Бот автоматически рассчитает лимит прогулов по часам предмета.</span>
-            </p>
+<h1 class="text-[2.25rem] leading-[1.08] sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-5">
+<span class="lang-az">Qaibləri unut,<br>ballarına <span class="text-blue-500">hökm et.</span></span>
+<span class="lang-ru hidden">Забудь про пропуски,<br>управляй <span class="text-blue-500">баллами.</span></span>
+</h1>
 
-            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start hidden md:flex">
-                <a href="https://t.me/bdutrackerbot" target="_blank" class="inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold text-white transition-all btn-tg rounded-xl hover:-translate-y-1">
-                    <i class="fa-brands fa-telegram text-2xl"></i>
-                    <span class="lang-az">Telegram-da Başla</span>
-                    <span class="lang-ru hidden">Начать в Telegram</span>
-                </a>
-            </div>
-        </div>
+<p class="text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed max-w-lg mx-auto lg:mx-0 mb-7">
+<span class="lang-az">Sessiya nəticələrini və qaib limitlərini izləyə biləcəyin rahat tətbiq birbaşa Telegram-da. Heç bir əlavə sayt və qeydiyyat lazım deyil.</span>
+<span class="lang-ru hidden">Удобное приложение прямо в Telegram для отслеживания сессии и лимитов пропусков. Никаких сайтов и регистраций.</span>
+</p>
 
+<a href="https://t.me/bdutrackerbot" target="_blank" class="hidden md:inline-flex items-center gap-3 btn text-white px-8 py-4 rounded-xl font-bold"><i class="fa-brands fa-telegram text-xl"></i><span class="lang-az">Telegram-da Aç</span><span class="lang-ru hidden">Открыть в Telegram</span></a>
+</div>
 
-        <div class="w-full lg:w-1/2 flex justify-center lg:justify-end px-2 sm:px-0">
-            <div class="widget w-full max-w-md rounded-2xl p-5 md:p-6 relative overflow-hidden">
-                <div class="absolute -top-16 -right-16 w-32 h-32 md:w-40 md:h-40 bg-blue-600/20 blur-3xl rounded-full"></div>
-                
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#1F2937] flex items-center justify-center shadow-inner">
-                            <i class="fa-solid fa-book text-blue-400"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-white text-sm md:text-base lang-az">Riyazi Analiz</h3>
-                            <h3 class="font-bold text-white text-sm md:text-base lang-ru hidden">Мат. анализ</h3>
-                            <p class="text-xs text-gray-400">60 saat / часов</p>
-                        </div>
-                    </div>
-                    <span class="px-2 md:px-3 py-1 bg-green-500/10 text-green-400 text-[10px] md:text-xs font-bold rounded-lg border border-green-500/20">Aktiv</span>
-                </div>
+<div class="flex justify-center lg:justify-end">
+<div class="widget w-full max-w-md rounded-2xl p-4 sm:p-5 md:p-6">
 
-                <div class="space-y-4">
-                    <div class="bg-[#090E17] p-3 md:p-4 rounded-xl border border-[#1F2937] shadow-inner">
-                        <div class="flex justify-between text-xs md:text-sm mb-2">
-                            <span class="text-gray-400 lang-az">Qaib limiti</span>
-                            <span class="text-gray-400 lang-ru hidden">Лимит пропусков</span>
-                            <span class="font-bold text-white">3 <span class="text-gray-500">/ 7</span></span>
-                        </div>
-                        <div class="w-full bg-gray-800 rounded-full h-1.5 md:h-2">
-                            <div class="bg-blue-500 h-1.5 md:h-2 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)]" style="width: 42%"></div>
-                        </div>
-                    </div>
+<div class="flex justify-between items-center gap-3 mb-5">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-10 h-10 shrink-0 rounded-full bg-[#1F2937] flex items-center justify-center"><i class="fa-solid fa-book text-blue-400"></i></div>
+<div><h3 class="font-bold text-sm sm:text-base"><span class="lang-az">Riyazi Analiz</span><span class="lang-ru hidden">Мат. анализ</span></h3><p class="text-xs text-gray-400">60 saat / часов</p></div>
+</div>
+<span class="shrink-0 px-2.5 py-1 bg-green-500/10 text-green-400 text-[10px] sm:text-xs font-bold rounded-lg border border-green-500/20">Aktiv</span>
+</div>
 
-                    <div class="grid grid-cols-2 gap-3 md:gap-4">
-                        <div class="bg-[#090E17] p-3 md:p-4 rounded-xl border border-[#1F2937] shadow-inner text-center md:text-left">
-                            <p class="text-[10px] md:text-xs text-gray-500 mb-1 lang-az">Sessiya balı</p>
-                            <p class="text-[10px] md:text-xs text-gray-500 mb-1 lang-ru hidden">Балл сессии</p>
-                            <p class="font-bold text-lg md:text-xl text-white">43<span class="text-xs md:text-sm text-gray-500 font-medium">/50</span></p>
-                        </div>
-                        <div class="bg-[#090E17] p-3 md:p-4 rounded-xl border border-[#1F2937] shadow-inner text-center md:text-left relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-16 h-16 bg-green-500/5 blur-xl rounded-full"></div>
-                            <p class="text-[10px] md:text-xs text-gray-500 mb-1 lang-az">Ümumi nəticə</p>
-                            <p class="text-[10px] md:text-xs text-gray-500 mb-1 lang-ru hidden">Общий итог</p>
-                            <p class="font-bold text-lg md:text-xl text-green-400">89 <span class="text-xs md:text-sm text-green-500/50">(B)</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+<div class="space-y-3">
+<div class="bg-[#090E17] p-3.5 sm:p-4 rounded-xl border border-[#1F2937]">
+<div class="flex justify-between text-xs sm:text-sm mb-2"><span class="text-gray-400"><span class="lang-az">Qaib limiti</span><span class="lang-ru hidden">Лимит пропусков</span></span><b>3 <span class="text-gray-500">/ 7</span></b></div>
+<div class="w-full bg-gray-800 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width:42%"></div></div>
+</div>
 
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-[#090E17] p-3.5 sm:p-4 rounded-xl border border-[#1F2937]"><p class="text-[10px] sm:text-xs text-gray-500 mb-1"><span class="lang-az">Sessiya balı</span><span class="lang-ru hidden">Балл сессии</span></p><b class="text-lg sm:text-xl">43<span class="text-xs text-gray-500">/50</span></b></div>
+<div class="bg-[#090E17] p-3.5 sm:p-4 rounded-xl border border-[#1F2937]"><p class="text-[10px] sm:text-xs text-gray-500 mb-1"><span class="lang-az">Ümumi nəticə</span><span class="lang-ru hidden">Общий итог</span></p><b class="text-lg sm:text-xl text-green-400">89 <span class="text-xs text-green-500/50">(B)</span></b></div>
+</div>
+</div>
+</div>
+</div>
 
-    <section class="w-full border-t border-[#1F2937] bg-[#0B111F]">
-        <div class="max-w-6xl mx-auto px-4 md:px-8 py-16">
-            <h2 class="text-2xl md:text-4xl font-bold text-center text-white mb-10 md:mb-16">
-                <span class="lang-az">Necə başlamaq olar?</span>
-                <span class="lang-ru hidden">Как начать пользоваться?</span>
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+</div>
+</main>
 
-                <div class="text-center relative">
-                    <div class="w-16 h-16 mx-auto bg-blue-500/10 border border-blue-500/30 rounded-full flex items-center justify-center mb-4 z-10 relative">
-                        <span class="text-blue-400 font-bold text-2xl">1</span>
-                    </div>
-                    <div class="hidden md:block absolute top-8 left-[60%] w-[80%] h-[1px] bg-gradient-to-r from-blue-500/50 to-transparent"></div>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-az">Botu işə sal</h3>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-ru hidden">Запусти бота</h3>
-                    <p class="text-sm text-gray-400 lang-az">Telegram-a keçid et və /start düyməsini sıxaraq dilini seç.</p>
-                    <p class="text-sm text-gray-400 lang-ru hidden">Перейди в Telegram, нажми /start и выбери удобный язык.</p>
-                </div>
+<section class="border-t border-[#1F2937] bg-[#0B111F] py-12 md:py-16">
+<div class="max-w-4xl mx-auto px-4 text-center">
+<div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl sm:text-2xl mb-5 border border-blue-500/20"><i class="fa-solid fa-shield-halved"></i></div>
+<h2 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3"><span class="lang-az">Məxfiliyiniz və Təhlükəsizliyiniz</span><span class="lang-ru hidden">Ваша конфиденциальность и безопасность</span></h2>
+<p class="text-sm md:text-base text-gray-400 leading-relaxed max-w-xl mx-auto">
+<span class="lang-az">Qiymətləriniz, fənləriniz və qaibləriniz yalnız <strong class="text-gray-300">sizin cihazınızda</strong> saxlanılır. Məlumatlar serverə göndərilmir.</span>
+<span class="lang-ru hidden">Ваши оценки, предметы и пропуски сохраняются только <strong class="text-gray-300">на вашем устройстве.</strong> Данные не отправляются на сервер.</span>
+</p>
+</div>
+</section>
 
-                <div class="text-center relative">
-                    <div class="w-16 h-16 mx-auto bg-purple-500/10 border border-purple-500/30 rounded-full flex items-center justify-center mb-4 z-10 relative">
-                        <span class="text-purple-400 font-bold text-2xl">2</span>
-                    </div>
-                    <div class="hidden md:block absolute top-8 left-[60%] w-[80%] h-[1px] bg-gradient-to-r from-purple-500/50 to-transparent"></div>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-az">Fənləri əlavə et</h3>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-ru hidden">Добавь предметы</h3>
-                    <p class="text-sm text-gray-400 lang-az">/add əmri ilə fənlərini və saatlarını bazaya daxil et.</p>
-                    <p class="text-sm text-gray-400 lang-ru hidden">Используй команду /add, чтобы добавить названия предметов и их часы.</p>
-                </div>
+<section class="border-t border-[#1F2937] py-12 md:py-20">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12"><span class="lang-az">Niyə BDU Tracker?</span><span class="lang-ru hidden">Почему BDU Tracker?</span></h2>
 
-                <div class="text-center relative">
-                    <div class="w-16 h-16 mx-auto bg-green-500/10 border border-green-500/30 rounded-full flex items-center justify-center mb-4 z-10 relative">
-                        <span class="text-green-400 font-bold text-2xl">3</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-az">İzlə və rahat ol</h3>
-                    <h3 class="text-lg font-bold text-white mb-2 lang-ru hidden">Отслеживай и отдыхай</h3>
-                    <p class="text-sm text-gray-400 lang-az">Qaibləri (/skip) və balları (/points) daxil et, qalanını bot həll edəcək.</p>
-                    <p class="text-sm text-gray-400 lang-ru hidden">Отмечай пропуски (/skip) и оценки (/points), остальное бот посчитает сам.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="grid md:grid-cols-3 gap-4 md:gap-6">
 
+<div class="card p-5 md:p-6">
+<div class="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4"><i class="fa-solid fa-bolt"></i></div>
+<h3 class="text-base md:text-lg font-bold mb-2"><span class="lang-az">Ani Hesablama</span><span class="lang-ru hidden">Мгновенный расчет</span></h3>
+<p class="text-sm text-gray-400 leading-relaxed"><span class="lang-az">Seminar və kollokvium ballarını daxil et, sistem orta balı özü hesablasın.</span><span class="lang-ru hidden">Вводите баллы за семинары и коллоквиумы, система сама посчитает средний балл.</span></p>
+</div>
 
-    <section class="w-full border-t border-[#1F2937] bg-[#090E17] py-16 md:py-20">
-        <div class="max-w-3xl mx-auto px-4 md:px-8">
-            <h2 class="text-2xl md:text-4xl font-bold text-center text-white mb-10">
-                <span class="lang-az">Tez-tez verilən suallar</span>
-                <span class="lang-ru hidden">Частые вопросы (FAQ)</span>
-            </h2>
-            
-            <div class="space-y-4">
+<div class="card p-5 md:p-6">
+<div class="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+<h3 class="text-base md:text-lg font-bold mb-2"><span class="lang-az">Avtomatik Qaib Limiti</span><span class="lang-ru hidden">Авто-лимит пропусков</span></h3>
+<p class="text-sm text-gray-400 leading-relaxed"><span class="lang-az">Fənnin ümumi saatına uyğun olaraq icazə verilən qaib limitini avtomatik təyin edir.</span><span class="lang-ru hidden">Автоматически определяет допустимый лимит пропусков в зависимости от часов предмета.</span></p>
+</div>
 
-                <div class="feature-card overflow-hidden">
-                    <button class="w-full px-6 py-4 flex justify-between items-center focus:outline-none" onclick="toggleFaq(1)">
-                        <span class="font-semibold text-white text-left lang-az">Bot ödənişlidir?</span>
-                        <span class="font-semibold text-white text-left lang-ru hidden">Бот платный?</span>
-                        <i class="fa-solid fa-plus text-blue-400 faq-icon" id="faq-icon-1"></i>
-                    </button>
-                    <div class="faq-content bg-[#090E17]" id="faq-content-1">
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-az">Xeyr, bot BDU tələbələri üçün tamamilə pulsuzdur və həmişə pulsuz qalacaq.</p>
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-ru hidden">Нет, бот абсолютно бесплатен для студентов БГУ и останется таким навсегда.</p>
-                    </div>
-                </div>
-                
+<div class="card p-5 md:p-6">
+<div class="w-11 h-11 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 mb-4"><i class="fa-solid fa-mobile-screen-button"></i></div>
+<h3 class="text-base md:text-lg font-bold mb-2">Telegram Mini App</h3>
+<p class="text-sm text-gray-400 leading-relaxed"><span class="lang-az">Heç bir əlavə tətbiq yükləmədən birbaşa Telegram içində sürətli interfeys.</span><span class="lang-ru hidden">Быстрый интерфейс прямо внутри Telegram без установки дополнительных приложений.</span></p>
+</div>
 
-                <div class="feature-card overflow-hidden">
-                    <button class="w-full px-6 py-4 flex justify-between items-center focus:outline-none" onclick="toggleFaq(2)">
-                        <span class="font-semibold text-white text-left lang-az">Məlumatlarım güvəndədir?</span>
-                        <span class="font-semibold text-white text-left lang-ru hidden">Мои данные в безопасности?</span>
-                        <i class="fa-solid fa-plus text-blue-400 faq-icon" id="faq-icon-2"></i>
-                    </button>
-                    <div class="faq-content bg-[#090E17]" id="faq-content-2">
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-az">Bəli. Bot yalnız sizin daxil etdiyiniz fənləri və qiymətləri yadda saxlayır. BDU-nun şəxsi kabinetinə və ya e-telebe sisteminə heç bir çıxışı yoxdur.</p>
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-ru hidden">Да. Бот хранит только те названия и оценки, которые вы вводите сами. У него нет доступа к личному кабинету БГУ или системе e-telebe.</p>
-                    </div>
-                </div>
+</div>
+</div>
+</section>
 
+<section class="border-t border-[#1F2937] bg-[#0B111F] py-12 md:py-20">
+<div class="max-w-3xl mx-auto px-4">
+<h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8"><span class="lang-az">Tez-tez verilən suallar</span><span class="lang-ru hidden">Частые вопросы</span></h2>
 
-                <div class="feature-card overflow-hidden">
-                    <button class="w-full px-6 py-4 flex justify-between items-center focus:outline-none" onclick="toggleFaq(3)">
-                        <span class="font-semibold text-white text-left lang-az">Fənn cədvəldə yoxdursa nə edim?</span>
-                        <span class="font-semibold text-white text-left lang-ru hidden">Что делать, если предмета нет?</span>
-                        <i class="fa-solid fa-plus text-blue-400 faq-icon" id="faq-icon-3"></i>
-                    </button>
-                    <div class="faq-content bg-[#090E17]" id="faq-content-3">
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-az">Heç bir problem yoxdur! Siz /add əmri ilə istənilən fənni, istədiyiniz adla və saatla özünüz əlavə edə bilərsiniz.</p>
-                        <p class="px-6 pb-4 text-sm text-gray-400 lang-ru hidden">Нет проблем! С помощью команды /add вы можете самостоятельно добавить любой предмет, указав его название и часы.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="space-y-3">
 
+<div class="card overflow-hidden">
+<button onclick="toggleFaq(1)" class="w-full min-h-[56px] px-5 py-4 flex justify-between items-center gap-4 text-left"><span class="font-semibold text-sm sm:text-base"><span class="lang-az">Tətbiq ödənişlidir?</span><span class="lang-ru hidden">Приложение платное?</span></span><i id="icon-1" class="fa-solid fa-plus text-blue-400 icon"></i></button>
+<div id="faq-1" class="faq bg-[#121A2F]"><p class="px-5 pb-5 text-sm text-gray-400"><span class="lang-az">Xeyr, BDU Tracker tələbələr üçün 100% pulsuzdur.</span><span class="lang-ru hidden">Нет, BDU Tracker полностью бесплатен для студентов.</span></p></div>
+</div>
 
-    <section class="w-full border-t border-[#1F2937] bg-[#0B111F] py-12 md:py-16">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-xl md:text-2xl font-bold text-white mb-2 lang-az">Bizimlə Əlaqə</h2>
-            <h2 class="text-xl md:text-2xl font-bold text-white mb-2 lang-ru hidden">Связь с нами</h2>
-            <p class="text-gray-400 text-sm md:text-base mb-6 md:mb-8 lang-az">Sualınız, probleminiz və ya təklifiniz var?</p>
-            <p class="text-gray-400 text-sm md:text-base mb-6 md:mb-8 lang-ru hidden">Есть вопросы, проблемы или предложения?</p>
-            
-            <div class="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
-                <a href="https://instagram.com/poladliii" target="_blank" class="flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-[#121A2F] border border-[#1F2937] text-white hover:border-pink-500/50 hover:bg-[#1A243F] transition-all font-medium group text-sm md:text-base">
-                    <i class="fa-brands fa-instagram text-lg md:text-xl text-pink-500 group-hover:scale-110 transition-transform"></i>
-                    <span>Instagram</span>
-                </a>
-                
-                <a href="https://t.me/poladlii" target="_blank" class="flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-[#121A2F] border border-[#1F2937] text-white hover:border-blue-500/50 hover:bg-[#1A243F] transition-all font-medium group text-sm md:text-base">
-                    <i class="fa-brands fa-telegram text-lg md:text-xl text-blue-400 group-hover:scale-110 transition-transform"></i>
-                    <span>Admin Telegram</span>
-                </a>
-            </div>
-        </div>
-    </section>
+<div class="card overflow-hidden">
+<button onclick="toggleFaq(2)" class="w-full min-h-[56px] px-5 py-4 flex justify-between items-center gap-4 text-left"><span class="font-semibold text-sm sm:text-base"><span class="lang-az">Məlumatlarım silinə bilər?</span><span class="lang-ru hidden">Могут ли мои данные удалиться?</span></span><i id="icon-2" class="fa-solid fa-plus text-blue-400 icon"></i></button>
+<div id="faq-2" class="faq bg-[#121A2F]"><p class="px-5 pb-5 text-sm text-gray-400"><span class="lang-az">Məlumatlar cihazınızda saxlanılır. Brauzer və ya Telegram məlumatları təmizlənərsə, məlumatlar silinə bilər.</span><span class="lang-ru hidden">Данные хранятся на устройстве. При очистке данных браузера или Telegram они могут быть удалены.</span></p></div>
+</div>
 
+<div class="card overflow-hidden">
+<button onclick="toggleFaq(3)" class="w-full min-h-[56px] px-5 py-4 flex justify-between items-center gap-4 text-left"><span class="font-semibold text-sm sm:text-base"><span class="lang-az">Necə qoşulmaq olar?</span><span class="lang-ru hidden">Как подключиться?</span></span><i id="icon-3" class="fa-solid fa-plus text-blue-400 icon"></i></button>
+<div id="faq-3" class="faq bg-[#121A2F]"><div class="px-5 pb-5"><p class="text-sm text-gray-400 mb-4"><span class="lang-az">Telegram botumuzu açın və Mini App-i başladın.</span><span class="lang-ru hidden">Откройте Telegram-бота и запустите Mini App.</span></p><a href="https://t.me/bdutrackerbot" target="_blank" class="inline-flex items-center gap-2 btn text-white font-bold text-sm px-5 py-3 rounded-xl"><i class="fa-brands fa-telegram"></i><span class="lang-az">Botu Aç</span><span class="lang-ru hidden">Открыть бота</span></a></div></div>
+</div>
 
-    <footer class="w-full border-t border-[#1F2937] bg-[#090E17] py-6 md:py-8 text-center mt-auto">
-        <p class="text-[#4B5563] text-xs md:text-sm font-medium lang-az">© 2026 BDU Tracker Bot. Tələbələr tərəfindən yaradılıb.</p>
-        <p class="text-[#4B5563] text-xs md:text-sm font-medium lang-ru hidden">© 2026 BDU Tracker Bot. Создано студентами.</p>
-    </footer>
+</div>
+</div>
+</section>
 
+<section class="border-t border-[#1F2937] py-10 md:py-16">
+<div class="max-w-4xl mx-auto px-4 text-center">
+<h2 class="text-xl sm:text-2xl font-bold mb-2"><span class="lang-az">Bizimlə Əlaqə</span><span class="lang-ru hidden">Связь с нами</span></h2>
+<p class="text-sm text-gray-400 mb-6"><span class="lang-az">Sualınız, probleminiz və ya təklifiniz var?</span><span class="lang-ru hidden">Есть вопросы, проблемы или предложения?</span></p>
+<div class="flex flex-col sm:flex-row justify-center gap-3">
+<a href="https://instagram.com/poladliii" target="_blank" class="flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-[#121A2F] border border-[#1F2937] text-white font-medium text-sm"><i class="fa-brands fa-instagram text-pink-500"></i>Instagram</a>
+<a href="https://t.me/poladlii" target="_blank" class="flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-[#121A2F] border border-[#1F2937] text-white font-medium text-sm"><i class="fa-brands fa-telegram text-blue-400"></i>Admin Telegram</a>
+</div>
+</div>
+</section>
 
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[#090E17]/80 backdrop-blur-xl border-t border-[#1F2937] p-4 z-[100]">
-        <a href="https://t.me/bdutrackerbot" target="_blank" class="flex items-center justify-center gap-2 w-full btn-tg text-white font-bold text-base py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95">
-            <i class="fa-brands fa-telegram text-xl"></i>
-            <span class="lang-az">Telegram-da Başla</span>
-            <span class="lang-ru hidden">Начать в Telegram</span>
-        </a>
-    </div>
+<footer class="border-t border-[#1F2937] bg-[#0B111F] py-6 text-center mb-[82px] md:mb-0">
+<p class="px-4 text-[#4B5563] text-xs">© 2026 BDU Tracker. <span class="lang-az">BDU tələbələri üçün yaradılıb.</span><span class="lang-ru hidden">Создано для студентов БГУ.</span></p>
+</footer>
 
-    <script>
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#090E17]/90 backdrop-blur-xl border-t border-[#1F2937] px-4 pt-3 safe">
+<a href="https://t.me/bdutrackerbot" target="_blank" class="flex items-center justify-center gap-2 w-full btn text-white font-bold text-sm py-3.5 rounded-xl"><i class="fa-brands fa-telegram"></i><span class="lang-az">Tətbiqi Aç</span><span class="lang-ru hidden">Открыть Web App</span></a>
+</div>
 
-        function setLang(lang) {
-            const btnAz = document.getElementById('lang-az');
-            const btnRu = document.getElementById('lang-ru');
-            
-            const activeStyle = "px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-all bg-[#1F2937] text-white shadow-sm";
-            const inactiveStyle = "px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-semibold transition-all text-gray-400 hover:text-white bg-transparent border border-transparent";
+<script>
+const active='px-3 py-1.5 rounded-md text-xs font-semibold bg-[#1F2937] text-white',inactive='px-3 py-1.5 rounded-md text-xs font-semibold text-gray-400';
+function setLang(lang){document.getElementById('lang-az').className=lang==='az'?active:inactive;document.getElementById('lang-ru').className=lang==='ru'?active:inactive;document.querySelectorAll('.lang-az').forEach(e=>e.classList.toggle('hidden',lang!=='az'));document.querySelectorAll('.lang-ru').forEach(e=>e.classList.toggle('hidden',lang!=='ru'));localStorage.setItem('bdutracker-lang',lang)}
+function toggleFaq(id){let c=document.getElementById('faq-'+id),i=document.getElementById('icon-'+id),open=c.classList.contains('show');document.querySelectorAll('.faq').forEach(e=>e.classList.remove('show'));document.querySelectorAll('.icon').forEach(e=>e.classList.remove('rotate'));if(!open){c.classList.add('show');i.classList.add('rotate')}}
+setLang(localStorage.getItem('bdutracker-lang')||'az');
+if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.disableVerticalSwipes?.()}
+</script>
 
-            if (lang === 'az') {
-                btnAz.className = activeStyle;
-                btnRu.className = inactiveStyle;
-                document.querySelectorAll('.lang-az').forEach(el => el.classList.remove('hidden'));
-                document.querySelectorAll('.lang-ru').forEach(el => el.classList.add('hidden'));
-            } else {
-                btnRu.className = activeStyle;
-                btnAz.className = inactiveStyle;
-                document.querySelectorAll('.lang-ru').forEach(el => el.classList.remove('hidden'));
-                document.querySelectorAll('.lang-az').forEach(el => el.classList.add('hidden'));
-            }
-        }
-
-
-        function toggleFaq(id) {
-            const content = document.getElementById('faq-content-' + id);
-            const icon = document.getElementById('faq-icon-' + id);
-            
-            if (content.classList.contains('show')) {
-                content.classList.remove('show');
-                icon.classList.remove('rotate');
-            } else {
-
-                document.querySelectorAll('.faq-content').forEach(el => el.classList.remove('show'));
-                document.querySelectorAll('.faq-icon').forEach(el => el.classList.remove('rotate'));
-                
-                content.classList.add('show');
-                icon.classList.add('rotate');
-            }
-        }
-    </script>
 </body>
 </html>
