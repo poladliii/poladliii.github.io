@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BDU Tracker WebApp</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f4f4f5);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #71717a);
+            --btn-color: var(--tg-theme-button-color, #3b82f6);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding-bottom: 80px; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tg-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
+        .tg-input { background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--hint-color); opacity: 0.8; }
+        .tg-input:focus { border-color: var(--btn-color); opacity: 1; }
+        .progress-bar { background-color: var(--bg-color); border-radius: 8px; overflow: hidden; height: 8px; width: 100%; }
+        .progress-fill { height: 100%; background-color: var(--btn-color); border-radius: 8px; transition: width 0.3s ease; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Лоадер */
+        #loader { display: flex; flex-direction: column; justify-content: center; items-center; height: 100vh; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН ЗАГРУЗКИ -->
+    <div id="loader" class="screen active text-center pt-32">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--btn-color);"></i>
+        <p class="font-bold opacity-70">Məlumatlar yüklənir...<br>(Синхронизация с сервером)</p>
+    </div>
+
+    <!-- ЭКРАН 1: ГЛАВНАЯ (Список предметов) -->
+    <div id="screen-home" class="screen p-4">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-extrabold">Fənlərim 📚</h1>
+            <button onclick="showScreen('screen-add')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--btn-color); color: var(--btn-text);">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+        <div id="subjects-list"></div>
+    </div>
+
+    <!-- ЭКРАН 2: ДОБАВЛЕНИЕ ПРЕДМЕТА -->
+    <div id="screen-add" class="screen p-4">
+        <button onclick="showScreen('screen-home')" class="mb-4 text-xl" style="color: var(--btn-color);">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Geri
+        </button>
+        <h1 class="text-2xl font-bold mb-6">Yeni Fənn</h1>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold mb-2 opacity-80">Fənnin adı</label>
+                <input type="text" id="add-name" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="Məs: Riyazi analiz">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-2 opacity-80">Saatlar</label>
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <button onclick="document.getElementById('add-hours').value=30" class="tg-card py-2 text-sm font-bold text-center active:scale-95">30</button>
+                    <button onclick="document.getElementById('add-hours').value=45" class="tg-card py-2 text-sm font-bold text-center active:scale-95">45</button>
+                    <button onclick="document.getElementById('add-hours').value=60" class="tg-card py-2 text-sm font-bold text-center active:scale-95">60</button>
+                    <button onclick="document.getElementById('add-hours').value=75" class="tg-card py-2 text-sm font-bold text-center active:scale-95">75</button>
+                </div>
+                <input type="number" id="add-hours" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="və ya əllə daxil edin...">
+            </div>
+            <button onclick="saveSubject()" class="w-full py-4 rounded-xl font-bold mt-4 shadow-lg active:scale-95 transition-transform" style="background-color: var(--btn-color); color: var(--btn-text);">
+                ƏLAVƏ ET
+            </button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 3: ДЕТАЛИ ПРЕДМЕТА (Управление баллами и qaib) -->
+    <div id="screen-detail" class="screen p-4">
+        <button onclick="showScreen('screen-home')" class="mb-4 text-xl" style="color: var(--btn-color);">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Geri
+        </button>
+        
+        <div class="tg-card relative overflow-hidden mb-4">
+            <h2 id="det-name" class="text-xl font-bold mb-1">Fənn</h2>
+            <p id="det-hours" class="text-xs opacity-60 mb-4">60 saat</p>
+            
+            <div class="mb-4 p-3 rounded-xl" style="background-color: var(--bg-color);">
+                <div class="flex justify-between text-sm mb-2 font-bold">
+                    <span>Qaiblər</span>
+                    <span id="det-skips-text">0 / 0</span>
+                </div>
+                <div class="progress-bar mb-3">
+                    <div id="det-skips-bar" class="progress-fill"></div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="changeSkip(-1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-gray-500/20 text-gray-500 active:scale-95">-1 Sil</button>
+                    <button onclick="changeSkip(1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-red-500/20 text-red-500 active:scale-95">+1 Qaib</button>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center p-3 rounded-xl" style="background-color: var(--bg-color);">
+                <div>
+                    <p class="text-xs opacity-60">Ümumi Bal</p>
+                    <p class="text-2xl font-extrabold"><span id="det-total-score">0</span><span class="text-sm font-normal opacity-50">/100</span></p>
+                </div>
+                <div id="det-grade" class="w-10 h-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center font-bold text-xl">A</div>
+            </div>
+        </div>
+
+        <h3 class="font-bold mb-2 ml-1">Qiymətlər (Ballar)</h3>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center tg-card !py-3 !mb-0">
+                <span class="text-sm font-semibold">Sərbəst iş (0-10)</span>
+                <input type="number" id="inp-indep" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+            </div>
+            <div class="flex justify-between items-center tg-card !py-3 !mb-0">
+                <span class="text-sm font-semibold">Seminarlar (0-30)</span>
+                <input type="number" id="inp-sem" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+            </div>
+            <div class="flex justify-between items-center tg-card !py-3 !mb-0">
+                <span class="text-sm font-semibold">İmtahan (0-50)</span>
+                <input type="number" id="inp-exam" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+            </div>
+            
+            <button onclick="deleteSubject()" class="w-full mt-6 py-3 rounded-xl font-bold text-red-500 bg-red-500/10 active:scale-95 transition-transform">
+                <i class="fa-solid fa-trash mr-2"></i> Fənni Sil
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // ⚠️ ВАЖНО: Сюда нужно будет вписать IP или домен сервера, где запущен Python!
+        // Для тестов на компе это может быть https://твоя-ссылка-из-ngrok.ngrok-free.app
+        const API_URL = "http://127.0.0.1:5000/api"; 
+        
+        // Получаем уникальный ID студента из Телеграма (если открыто в браузере — даем тестовый ID)
+        const userId = tg.initDataUnsafe?.user?.id || 123456789; 
+
+        let subjects = [];
+        let currentSubjId = null;
+
+        // Вспомогательные расчеты 
+        function calcMaxSkips(hours) {
+            if (hours === 120) return 14; if (hours === 105) return 13; if (hours === 90) return 11;
+            if (hours === 75) return 9; if (hours === 60) return 7; if (hours === 45) return 5;
+            if (hours === 30) return 3; return Math.max(0, Math.floor((hours * 2 / 15) - 1));
+        }
+
+        function calcAttendScore(hours, skips, maxSkips) {
+            if (skips === 0) return 10;
+            if (skips > maxSkips) return 0;
+            let ratio = skips / maxSkips;
+            if (ratio <= 0.33) return 10;
+            if (ratio <= 0.66) return 9;
+            return 8;
+        }
+
+        // ==========================================
+        // РАБОТА С ОБЛАЧНОЙ БАЗОЙ (СЕРВЕРОМ)
+        // ==========================================
+        
+        // Загрузка данных с сервера при запуске
+        async function loadCloudDb() {
+            try {
+                let response = await fetch(`${API_URL}/get_data?user_id=${userId}`);
+                let data = await response.json();
+                subjects = data.subjects || [];
+                showScreen('screen-home');
+                renderHome();
+            } catch (error) {
+                console.error("Ошибка загрузки:", error);
+                tg.showAlert("Serverlə əlaqə kəsilib! (Ошибка соединения с сервером)");
+            }
+        }
+
+        // Сохранение данных на сервер при любых изменениях
+        async function saveCloudDb() {
+            renderHome(); // Сразу обновляем интерфейс для скорости (Optimistic UI)
+            try {
+                await fetch(`${API_URL}/save_data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, subjects: subjects })
+                });
+            } catch (error) {
+                console.error("Ошибка сохранения:", error);
+            }
+        }
+
+        // ==========================================
+        // ЛОГИКА ИНТЕРФЕЙСА
+        // ==========================================
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function renderHome() {
+            const list = document.getElementById('subjects-list');
+            list.innerHTML = '';
+            
+            if(subjects.length === 0) {
+                list.innerHTML = '<div class="text-center opacity-50 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3"></i><p>Hələ fənn yoxdur</p></div>';
+                return;
+            }
+
+            subjects.forEach(sub => {
+                let attScore = calcAttendScore(sub.hours, sub.skips, sub.maxSkips);
+                let total = (sub.indep || 0) + (sub.sem || 0) + attScore + (sub.exam || 0);
+                let isDanger = sub.skips >= sub.maxSkips;
+
+                list.innerHTML += `
+                    <div onclick="openDetail(${sub.id})" class="tg-card active:scale-95 transition-transform cursor-pointer relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-lg">${sub.name}</h3>
+                            <span class="font-extrabold" style="color: var(--btn-color);">${total}</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-semibold ${isDanger ? 'text-red-500' : 'opacity-60'}">
+                            <span>Qaib: ${sub.skips} / ${sub.maxSkips}</span>
+                            <span>Limitə qaldı: ${Math.max(0, sub.maxSkips - sub.skips)}</span>
+                        </div>
+                        <div class="progress-bar mt-2" style="height: 4px;">
+                            <div class="progress-fill ${isDanger ? '!bg-red-500' : ''}" style="width: ${(sub.skips/sub.maxSkips)*100}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function saveSubject() {
+            let name = document.getElementById('add-name').value;
+            let hours = parseInt(document.getElementById('add-hours').value);
+            
+            if(!name || !hours) { tg.showAlert('Məlumatları tam doldurun!'); return; }
+
+            subjects.push({
+                id: Date.now(), name: name, hours: hours, maxSkips: calcMaxSkips(hours),
+                skips: 0, indep: 0, sem: 0, exam: 0
+            });
+            
+            document.getElementById('add-name').value = '';
+            document.getElementById('add-hours').value = '';
+            saveCloudDb();
+            showScreen('screen-home');
+        }
+
+        function openDetail(id) {
+            currentSubjId = id;
+            let sub = subjects.find(s => s.id === id);
+            
+            document.getElementById('det-name').innerText = sub.name;
+            document.getElementById('det-hours').innerText = `${sub.hours} saat`;
+            
+            document.getElementById('inp-indep').value = sub.indep;
+            document.getElementById('inp-sem').value = sub.sem;
+            document.getElementById('inp-exam').value = sub.exam;
+
+            updateDetailUI();
+            showScreen('screen-detail');
+        }
+
+        function changeSkip(val) {
+            let sub = subjects.find(s => s.id === currentSubjId);
+            if (sub.skips + val < 0) return;
+            sub.skips += val;
+            
+            if (sub.skips > sub.maxSkips) tg.HapticFeedback.notificationOccurred('warning');
+            else tg.HapticFeedback.impactOccurred('light');
+
+            updateDetailUI();
+            saveCloudDb();
+        }
+
+        function updateGrades() {
+            let sub = subjects.find(s => s.id === currentSubjId);
+            sub.indep = parseInt(document.getElementById('inp-indep').value) || 0;
+            sub.sem = parseInt(document.getElementById('inp-sem').value) || 0;
+            sub.exam = parseInt(document.getElementById('inp-exam').value) || 0;
+            
+            if (sub.indep > 10) sub.indep = 10; if (sub.sem > 30) sub.sem = 30; if (sub.exam > 50) sub.exam = 50;
+            
+            document.getElementById('inp-indep').value = sub.indep;
+            document.getElementById('inp-sem').value = sub.sem;
+            document.getElementById('inp-exam').value = sub.exam;
+
+            updateDetailUI();
+            saveCloudDb();
+        }
+
+        function updateDetailUI() {
+            let sub = subjects.find(s => s.id === currentSubjId);
+            let attScore = calcAttendScore(sub.hours, sub.skips, sub.maxSkips);
+            let total = sub.indep + sub.sem + attScore + sub.exam;
+            let isDanger = sub.skips > sub.maxSkips;
+            
+            document.getElementById('det-skips-text').innerText = `${sub.skips} / ${sub.maxSkips}`;
+            document.getElementById('det-skips-text').style.color = isDanger ? '#ef4444' : 'inherit';
+            
+            let barWidth = Math.min(100, (sub.skips / sub.maxSkips) * 100);
+            document.getElementById('det-skips-bar').style.width = `${barWidth}%`;
+            document.getElementById('det-skips-bar').style.backgroundColor = isDanger ? '#ef4444' : 'var(--btn-color)';
+
+            document.getElementById('det-total-score').innerText = total;
+            
+            let gradeText = 'F'; let gradeColor = 'bg-red-500/20 text-red-500';
+            if(total >= 91) { gradeText = 'A'; gradeColor = 'bg-green-500/20 text-green-500'; }
+            else if(total >= 81) { gradeText = 'B'; gradeColor = 'bg-blue-500/20 text-blue-500'; }
+            else if(total >= 71) { gradeText = 'C'; gradeColor = 'bg-blue-500/20 text-blue-500'; }
+            else if(total >= 61) { gradeText = 'D'; gradeColor = 'bg-yellow-500/20 text-yellow-500'; }
+            else if(total >= 51) { gradeText = 'E'; gradeColor = 'bg-orange-500/20 text-orange-500'; }
+            
+            document.getElementById('det-grade').innerText = gradeText;
+            document.getElementById('det-grade').className = `w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl ${gradeColor}`;
+        }
+
+        function deleteSubject() {
+            tg.showConfirm("Fənni silmək istədiyinizə əminsiniz?", function(res) {
+                if(res) {
+                    subjects = subjects.filter(s => s.id !== currentSubjId);
+                    saveCloudDb();
+                    showScreen('screen-home');
+                }
+            });
+        }
+
+        // СТАРТ: Загружаем базу из сервера при открытии WebApp
+        loadCloudDb();
+        
+    </script>
+</body>
+</html>
