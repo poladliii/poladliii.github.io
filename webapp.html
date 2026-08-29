@@ -29,36 +29,61 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .tg-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
-        .tg-input { background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--hint-color); opacity: 0.8; }
-        .tg-input:focus { border-color: var(--btn-color); opacity: 1; }
-        .progress-bar { background-color: var(--bg-color); border-radius: 8px; overflow: hidden; height: 8px; width: 100%; }
-        .progress-fill { height: 100%; background-color: var(--btn-color); border-radius: 8px; transition: width 0.3s ease; }
+        .tg-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .tg-input {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--hint-color);
+            opacity: 0.8;
+        }
+        
+        .tg-input:focus {
+            border-color: var(--btn-color);
+            opacity: 1;
+        }
+
+        .progress-bar {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 8px;
+            width: 100%;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--btn-color);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
         
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Лоадер */
-        #loader { display: flex; flex-direction: column; justify-content: center; items-center; height: 100vh; text-align: center; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <!-- ЭКРАН ЗАГРУЗКИ -->
-    <div id="loader" class="screen active text-center pt-32">
-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--btn-color);"></i>
-        <p class="font-bold opacity-70">Məlumatlar yüklənir...<br>(Синхронизация с сервером)</p>
-    </div>
-
     <!-- ЭКРАН 1: ГЛАВНАЯ (Список предметов) -->
-    <div id="screen-home" class="screen p-4">
+    <div id="screen-home" class="screen active p-4">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-extrabold">Fənlərim 📚</h1>
             <button onclick="showScreen('screen-add')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--btn-color); color: var(--btn-text);">
                 <i class="fa-solid fa-plus"></i>
             </button>
         </div>
+        
         <div id="subjects-list"></div>
     </div>
 
@@ -90,7 +115,7 @@
         </div>
     </div>
 
-    <!-- ЭКРАН 3: ДЕТАЛИ ПРЕДМЕТА (Управление баллами и qaib) -->
+    <!-- ЭКРАН 3: ДЕТАЛИ ПРЕДМЕТА -->
     <div id="screen-detail" class="screen p-4">
         <button onclick="showScreen('screen-home')" class="mb-4 text-xl" style="color: var(--btn-color);">
             <i class="fa-solid fa-arrow-left mr-2"></i> Geri
@@ -148,17 +173,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ⚠️ ВАЖНО: Сюда нужно будет вписать IP или домен сервера, где запущен Python!
-        // Для тестов на компе это может быть https://твоя-ссылка-из-ngrok.ngrok-free.app
-        const API_URL = "http://127.0.0.1:5000/api"; 
-        
-        // Получаем уникальный ID студента из Телеграма (если открыто в браузере — даем тестовый ID)
-        const userId = tg.initDataUnsafe?.user?.id || 123456789; 
-
-        let subjects = [];
+        // Загружаем базу ИЗ ПАМЯТИ ТЕЛЕФОНА
+        let subjects = JSON.parse(localStorage.getItem('bdu_subjects')) || [];
         let currentSubjId = null;
 
-        // Вспомогательные расчеты 
         function calcMaxSkips(hours) {
             if (hours === 120) return 14; if (hours === 105) return 13; if (hours === 90) return 11;
             if (hours === 75) return 9; if (hours === 60) return 7; if (hours === 45) return 5;
@@ -174,45 +192,16 @@
             return 8;
         }
 
-        // ==========================================
-        // РАБОТА С ОБЛАЧНОЙ БАЗОЙ (СЕРВЕРОМ)
-        // ==========================================
-        
-        // Загрузка данных с сервера при запуске
-        async function loadCloudDb() {
-            try {
-                let response = await fetch(`${API_URL}/get_data?user_id=${userId}`);
-                let data = await response.json();
-                subjects = data.subjects || [];
-                showScreen('screen-home');
-                renderHome();
-            } catch (error) {
-                console.error("Ошибка загрузки:", error);
-                tg.showAlert("Serverlə əlaqə kəsilib! (Ошибка соединения с сервером)");
-            }
+        // Сохраняем В ПАМЯТЬ ТЕЛЕФОНА
+        function saveDb() {
+            localStorage.setItem('bdu_subjects', JSON.stringify(subjects));
+            renderHome();
         }
-
-        // Сохранение данных на сервер при любых изменениях
-        async function saveCloudDb() {
-            renderHome(); // Сразу обновляем интерфейс для скорости (Optimistic UI)
-            try {
-                await fetch(`${API_URL}/save_data`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, subjects: subjects })
-                });
-            } catch (error) {
-                console.error("Ошибка сохранения:", error);
-            }
-        }
-
-        // ==========================================
-        // ЛОГИКА ИНТЕРФЕЙСА
-        // ==========================================
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            if(id === 'screen-home') renderHome();
         }
 
         function renderHome() {
@@ -260,7 +249,7 @@
             
             document.getElementById('add-name').value = '';
             document.getElementById('add-hours').value = '';
-            saveCloudDb();
+            saveDb();
             showScreen('screen-home');
         }
 
@@ -288,7 +277,7 @@
             else tg.HapticFeedback.impactOccurred('light');
 
             updateDetailUI();
-            saveCloudDb();
+            saveDb();
         }
 
         function updateGrades() {
@@ -304,7 +293,7 @@
             document.getElementById('inp-exam').value = sub.exam;
 
             updateDetailUI();
-            saveCloudDb();
+            saveDb();
         }
 
         function updateDetailUI() {
@@ -337,15 +326,13 @@
             tg.showConfirm("Fənni silmək istədiyinizə əminsiniz?", function(res) {
                 if(res) {
                     subjects = subjects.filter(s => s.id !== currentSubjId);
-                    saveCloudDb();
+                    saveDb();
                     showScreen('screen-home');
                 }
             });
         }
 
-        // СТАРТ: Загружаем базу из сервера при открытии WebApp
-        loadCloudDb();
-        
+        renderHome();
     </script>
 </body>
 </html>
