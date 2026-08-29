@@ -49,20 +49,8 @@
             opacity: 1;
         }
 
-        .progress-bar {
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            overflow: hidden;
-            height: 8px;
-            width: 100%;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: var(--btn-color);
-            border-radius: 8px;
-            transition: width 0.3s ease;
-        }
+        .progress-bar { background-color: var(--bg-color); border-radius: 8px; overflow: hidden; height: 8px; width: 100%; }
+        .progress-fill { height: 100%; background-color: var(--btn-color); border-radius: 8px; transition: width 0.3s ease; }
         
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
@@ -71,6 +59,8 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .lang-ru { display: none; } /* По умолчанию скрыт русский */
     </style>
 </head>
 <body>
@@ -78,10 +68,22 @@
     <!-- ЭКРАН 1: ГЛАВНАЯ (Список предметов) -->
     <div id="screen-home" class="screen active p-4">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-extrabold">Fənlərim 📚</h1>
-            <button onclick="showScreen('screen-add')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--btn-color); color: var(--btn-text);">
-                <i class="fa-solid fa-plus"></i>
-            </button>
+            <h1 class="text-2xl font-extrabold">
+                <span class="lang-az">Fənlərim 📚</span>
+                <span class="lang-ru">Предметы 📚</span>
+            </h1>
+            
+            <div class="flex items-center gap-3">
+                <!-- Переключатель языка -->
+                <div class="flex bg-gray-500/10 p-1 rounded-lg">
+                    <button onclick="setLang('az')" id="btn-az" class="px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white">AZ</button>
+                    <button onclick="setLang('ru')" id="btn-ru" class="px-2 py-1 rounded-md text-xs font-bold text-gray-500">RU</button>
+                </div>
+                <!-- Кнопка Добавить -->
+                <button onclick="showScreen('screen-add')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--btn-color); color: var(--btn-text);">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
         </div>
         
         <div id="subjects-list"></div>
@@ -90,27 +92,34 @@
     <!-- ЭКРАН 2: ДОБАВЛЕНИЕ ПРЕДМЕТА -->
     <div id="screen-add" class="screen p-4">
         <button onclick="showScreen('screen-home')" class="mb-4 text-xl" style="color: var(--btn-color);">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Geri
+            <i class="fa-solid fa-arrow-left mr-2"></i> 
+            <span class="lang-az">Geri</span><span class="lang-ru">Назад</span>
         </button>
-        <h1 class="text-2xl font-bold mb-6">Yeni Fənn</h1>
+        <h1 class="text-2xl font-bold mb-6">
+            <span class="lang-az">Yeni Fənn</span><span class="lang-ru">Новый предмет</span>
+        </h1>
 
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-semibold mb-2 opacity-80">Fənnin adı</label>
-                <input type="text" id="add-name" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="Məs: Riyazi analiz">
+                <label class="block text-sm font-semibold mb-2 opacity-80">
+                    <span class="lang-az">Fənnin adı</span><span class="lang-ru">Название предмета</span>
+                </label>
+                <input type="text" id="add-name" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="Məs / Напр: Riyazi analiz">
             </div>
             <div>
-                <label class="block text-sm font-semibold mb-2 opacity-80">Saatlar</label>
+                <label class="block text-sm font-semibold mb-2 opacity-80">
+                    <span class="lang-az">Saatlar</span><span class="lang-ru">Часы</span>
+                </label>
                 <div class="grid grid-cols-4 gap-2 mb-2">
                     <button onclick="document.getElementById('add-hours').value=30" class="tg-card py-2 text-sm font-bold text-center active:scale-95">30</button>
                     <button onclick="document.getElementById('add-hours').value=45" class="tg-card py-2 text-sm font-bold text-center active:scale-95">45</button>
                     <button onclick="document.getElementById('add-hours').value=60" class="tg-card py-2 text-sm font-bold text-center active:scale-95">60</button>
                     <button onclick="document.getElementById('add-hours').value=75" class="tg-card py-2 text-sm font-bold text-center active:scale-95">75</button>
                 </div>
-                <input type="number" id="add-hours" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="və ya əllə daxil edin...">
+                <input type="number" id="add-hours" class="tg-input w-full px-4 py-3 rounded-xl focus:outline-none" placeholder="və ya əllə daxil edin / или вручную...">
             </div>
             <button onclick="saveSubject()" class="w-full py-4 rounded-xl font-bold mt-4 shadow-lg active:scale-95 transition-transform" style="background-color: var(--btn-color); color: var(--btn-text);">
-                ƏLAVƏ ET
+                <span class="lang-az">ƏLAVƏ ET</span><span class="lang-ru">ДОБАВИТЬ</span>
             </button>
         </div>
     </div>
@@ -118,53 +127,92 @@
     <!-- ЭКРАН 3: ДЕТАЛИ ПРЕДМЕТА -->
     <div id="screen-detail" class="screen p-4">
         <button onclick="showScreen('screen-home')" class="mb-4 text-xl" style="color: var(--btn-color);">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Geri
+            <i class="fa-solid fa-arrow-left mr-2"></i> 
+            <span class="lang-az">Geri</span><span class="lang-ru">Назад</span>
         </button>
         
         <div class="tg-card relative overflow-hidden mb-4">
             <h2 id="det-name" class="text-xl font-bold mb-1">Fənn</h2>
-            <p id="det-hours" class="text-xs opacity-60 mb-4">60 saat</p>
+            <p id="det-hours" class="text-xs opacity-60 mb-4">
+                <span id="det-hours-val"></span> <span class="lang-az">saat</span><span class="lang-ru">часов</span>
+            </p>
             
             <div class="mb-4 p-3 rounded-xl" style="background-color: var(--bg-color);">
                 <div class="flex justify-between text-sm mb-2 font-bold">
-                    <span>Qaiblər</span>
+                    <span>
+                        <span class="lang-az">Qaiblər</span><span class="lang-ru">Пропуски</span>
+                    </span>
                     <span id="det-skips-text">0 / 0</span>
                 </div>
                 <div class="progress-bar mb-3">
                     <div id="det-skips-bar" class="progress-fill"></div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="changeSkip(-1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-gray-500/20 text-gray-500 active:scale-95">-1 Sil</button>
-                    <button onclick="changeSkip(1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-red-500/20 text-red-500 active:scale-95">+1 Qaib</button>
+                    <button onclick="changeSkip(-1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-gray-500/20 text-gray-500 active:scale-95">-1 <span class="lang-az">Sil</span><span class="lang-ru">Удалить</span></button>
+                    <button onclick="changeSkip(1)" class="flex-1 py-2 rounded-lg font-bold text-sm bg-red-500/20 text-red-500 active:scale-95">+1 <span class="lang-az">Qaib</span><span class="lang-ru">Пропуск</span></button>
                 </div>
             </div>
             
             <div class="flex justify-between items-center p-3 rounded-xl" style="background-color: var(--bg-color);">
                 <div>
-                    <p class="text-xs opacity-60">Ümumi Bal</p>
+                    <p class="text-xs opacity-60">
+                        <span class="lang-az">Ümumi Bal</span><span class="lang-ru">Общий балл</span>
+                    </p>
                     <p class="text-2xl font-extrabold"><span id="det-total-score">0</span><span class="text-sm font-normal opacity-50">/100</span></p>
                 </div>
                 <div id="det-grade" class="w-10 h-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center font-bold text-xl">A</div>
             </div>
         </div>
 
-        <h3 class="font-bold mb-2 ml-1">Qiymətlər (Ballar)</h3>
+        <h3 class="font-bold mb-2 ml-1">
+            <span class="lang-az">Qiymətlər (Ballar)</span><span class="lang-ru">Оценки (Баллы)</span>
+        </h3>
         <div class="space-y-3">
             <div class="flex justify-between items-center tg-card !py-3 !mb-0">
-                <span class="text-sm font-semibold">Sərbəst iş (0-10)</span>
-                <input type="number" id="inp-indep" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+                <span class="text-sm font-semibold">
+                    <span class="lang-az">Sərbəst iş (0-10)</span><span class="lang-ru">С/Р (0-10)</span>
+                </span>
+                <input type="number" id="inp-indep" class="w-16 text-center py-1 rounded-lg tg-input font-bold" oninput="updateGrades()">
             </div>
-            <div class="flex justify-between items-center tg-card !py-3 !mb-0">
-                <span class="text-sm font-semibold">Seminarlar (0-30)</span>
-                <input type="number" id="inp-sem" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+            
+            <!-- Семинары (Текст) -->
+            <div class="tg-card !py-3 !mb-0">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold">
+                        <span class="lang-az">Seminarlar</span><span class="lang-ru">Семинары</span>
+                    </span>
+                </div>
+                <input type="text" id="inp-sem" class="w-full px-3 py-2 rounded-lg tg-input font-bold text-sm" placeholder="Məs / Напр: 9 10 8" oninput="updateGrades()">
             </div>
+
+            <!-- Коллоквиумы (Текст) -->
+            <div class="tg-card !py-3 !mb-0">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold">
+                        <span class="lang-az">Kollokviumlar</span><span class="lang-ru">Коллоквиумы</span>
+                    </span>
+                </div>
+                <input type="text" id="inp-col" class="w-full px-3 py-2 rounded-lg tg-input font-bold text-sm" placeholder="Məs / Напр: 10 9" oninput="updateGrades()">
+            </div>
+
+            <!-- Итог по Семинарам и Коллоквиумам (Автоматический) -->
+            <div class="flex justify-between items-center px-4 py-2 bg-blue-500/10 rounded-lg text-blue-500">
+                <span class="text-xs font-bold">
+                    <span class="lang-az">Seminar + Kollokvium Yekun:</span><span class="lang-ru">Итог Семинар + Колл:</span>
+                </span>
+                <span class="text-sm font-extrabold" id="det-semcol-score">0 / 30</span>
+            </div>
+
             <div class="flex justify-between items-center tg-card !py-3 !mb-0">
-                <span class="text-sm font-semibold">İmtahan (0-50)</span>
-                <input type="number" id="inp-exam" class="w-16 text-center py-1 rounded-lg tg-input font-bold" onchange="updateGrades()">
+                <span class="text-sm font-semibold">
+                    <span class="lang-az">İmtahan (0-50)</span><span class="lang-ru">Экзамен (0-50)</span>
+                </span>
+                <input type="number" id="inp-exam" class="w-16 text-center py-1 rounded-lg tg-input font-bold" oninput="updateGrades()">
             </div>
             
             <button onclick="deleteSubject()" class="w-full mt-6 py-3 rounded-xl font-bold text-red-500 bg-red-500/10 active:scale-95 transition-transform">
-                <i class="fa-solid fa-trash mr-2"></i> Fənni Sil
+                <i class="fa-solid fa-trash mr-2"></i> 
+                <span class="lang-az">Fənni Sil</span><span class="lang-ru">Удалить предмет</span>
             </button>
         </div>
     </div>
@@ -173,10 +221,29 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Загружаем базу ИЗ ПАМЯТИ ТЕЛЕФОНА
+        // 1. Управление языком
+        let currentLang = localStorage.getItem('bdu_lang') || 'az';
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('bdu_lang', lang);
+            
+            // Управление стилями кнопок
+            document.getElementById('btn-az').className = lang === 'az' ? 'px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white' : 'px-2 py-1 rounded-md text-xs font-bold text-gray-500 bg-transparent';
+            document.getElementById('btn-ru').className = lang === 'ru' ? 'px-2 py-1 rounded-md text-xs font-bold bg-blue-500 text-white' : 'px-2 py-1 rounded-md text-xs font-bold text-gray-500 bg-transparent';
+            
+            // Показ/скрытие текста
+            document.querySelectorAll('.lang-az').forEach(el => el.style.display = lang === 'az' ? 'inline' : 'none');
+            document.querySelectorAll('.lang-ru').forEach(el => el.style.display = lang === 'ru' ? 'inline' : 'none');
+            
+            renderHome();
+        }
+
+        // Загружаем базу
         let subjects = JSON.parse(localStorage.getItem('bdu_subjects')) || [];
         let currentSubjId = null;
 
+        // Расчет пропусков
         function calcMaxSkips(hours) {
             if (hours === 120) return 14; if (hours === 105) return 13; if (hours === 90) return 11;
             if (hours === 75) return 9; if (hours === 60) return 7; if (hours === 45) return 5;
@@ -192,7 +259,19 @@
             return 8;
         }
 
-        // Сохраняем В ПАМЯТЬ ТЕЛЕФОНА
+        // РАСЧЕТ СЕМИНАРОВ И КОЛЛОКВИУМОВ (Автоматически из строки)
+        function calcSemColScore(semStr, colStr) {
+            let semGrades = (semStr || "").match(/\d+/g) || [];
+            let colGrades = (colStr || "").match(/\d+/g) || [];
+            let allGrades = [...semGrades, ...colGrades].map(Number);
+            
+            if (allGrades.length === 0) return 0;
+            let sum = allGrades.reduce((a, b) => a + b, 0);
+            let avg = sum / allGrades.length;
+            let score = avg * 3;
+            return Math.min(30, score);
+        }
+
         function saveDb() {
             localStorage.setItem('bdu_subjects', JSON.stringify(subjects));
             renderHome();
@@ -209,14 +288,20 @@
             list.innerHTML = '';
             
             if(subjects.length === 0) {
-                list.innerHTML = '<div class="text-center opacity-50 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3"></i><p>Hələ fənn yoxdur</p></div>';
+                let emptyText = currentLang === 'az' ? 'Hələ fənn yoxdur' : 'Пока нет предметов';
+                list.innerHTML = `<div class="text-center opacity-50 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3"></i><p>${emptyText}</p></div>`;
                 return;
             }
 
             subjects.forEach(sub => {
                 let attScore = calcAttendScore(sub.hours, sub.skips, sub.maxSkips);
-                let total = (sub.indep || 0) + (sub.sem || 0) + attScore + (sub.exam || 0);
+                let semColScore = calcSemColScore(sub.sem_grades, sub.col_grades);
+                let sessionRaw = (sub.indep || 0) + semColScore + attScore;
+                let total = Math.round(sessionRaw) + (sub.exam || 0);
                 let isDanger = sub.skips >= sub.maxSkips;
+
+                let qText = currentLang === 'az' ? 'Qaib' : 'Пропуск';
+                let lText = currentLang === 'az' ? 'Limitə qaldı' : 'Осталось лимита';
 
                 list.innerHTML += `
                     <div onclick="openDetail(${sub.id})" class="tg-card active:scale-95 transition-transform cursor-pointer relative overflow-hidden">
@@ -225,8 +310,8 @@
                             <span class="font-extrabold" style="color: var(--btn-color);">${total}</span>
                         </div>
                         <div class="flex justify-between text-xs font-semibold ${isDanger ? 'text-red-500' : 'opacity-60'}">
-                            <span>Qaib: ${sub.skips} / ${sub.maxSkips}</span>
-                            <span>Limitə qaldı: ${Math.max(0, sub.maxSkips - sub.skips)}</span>
+                            <span>${qText}: ${sub.skips} / ${sub.maxSkips}</span>
+                            <span>${lText}: ${Math.max(0, sub.maxSkips - sub.skips)}</span>
                         </div>
                         <div class="progress-bar mt-2" style="height: 4px;">
                             <div class="progress-fill ${isDanger ? '!bg-red-500' : ''}" style="width: ${(sub.skips/sub.maxSkips)*100}%"></div>
@@ -240,11 +325,15 @@
             let name = document.getElementById('add-name').value;
             let hours = parseInt(document.getElementById('add-hours').value);
             
-            if(!name || !hours) { tg.showAlert('Məlumatları tam doldurun!'); return; }
+            if(!name || !hours) { 
+                let msg = currentLang === 'az' ? 'Məlumatları tam doldurun!' : 'Заполните все поля!';
+                tg.showAlert(msg); 
+                return; 
+            }
 
             subjects.push({
                 id: Date.now(), name: name, hours: hours, maxSkips: calcMaxSkips(hours),
-                skips: 0, indep: 0, sem: 0, exam: 0
+                skips: 0, indep: 0, exam: 0, sem_grades: "", col_grades: ""
             });
             
             document.getElementById('add-name').value = '';
@@ -258,11 +347,12 @@
             let sub = subjects.find(s => s.id === id);
             
             document.getElementById('det-name').innerText = sub.name;
-            document.getElementById('det-hours').innerText = `${sub.hours} saat`;
+            document.getElementById('det-hours-val').innerText = sub.hours;
             
-            document.getElementById('inp-indep').value = sub.indep;
-            document.getElementById('inp-sem').value = sub.sem;
-            document.getElementById('inp-exam').value = sub.exam;
+            document.getElementById('inp-indep').value = sub.indep || 0;
+            document.getElementById('inp-sem').value = sub.sem_grades || "";
+            document.getElementById('inp-col').value = sub.col_grades || "";
+            document.getElementById('inp-exam').value = sub.exam || 0;
 
             updateDetailUI();
             showScreen('screen-detail');
@@ -282,14 +372,19 @@
 
         function updateGrades() {
             let sub = subjects.find(s => s.id === currentSubjId);
-            sub.indep = parseInt(document.getElementById('inp-indep').value) || 0;
-            sub.sem = parseInt(document.getElementById('inp-sem').value) || 0;
-            sub.exam = parseInt(document.getElementById('inp-exam').value) || 0;
             
-            if (sub.indep > 10) sub.indep = 10; if (sub.sem > 30) sub.sem = 30; if (sub.exam > 50) sub.exam = 50;
+            // Защита от дурака для цифр
+            let indep = parseInt(document.getElementById('inp-indep').value) || 0;
+            let exam = parseInt(document.getElementById('inp-exam').value) || 0;
+            if (indep > 10) indep = 10;
+            if (exam > 50) exam = 50;
+            
+            sub.indep = indep;
+            sub.exam = exam;
+            sub.sem_grades = document.getElementById('inp-sem').value;
+            sub.col_grades = document.getElementById('inp-col').value;
             
             document.getElementById('inp-indep').value = sub.indep;
-            document.getElementById('inp-sem').value = sub.sem;
             document.getElementById('inp-exam').value = sub.exam;
 
             updateDetailUI();
@@ -298,8 +393,15 @@
 
         function updateDetailUI() {
             let sub = subjects.find(s => s.id === currentSubjId);
+            
             let attScore = calcAttendScore(sub.hours, sub.skips, sub.maxSkips);
-            let total = sub.indep + sub.sem + attScore + sub.exam;
+            let semColScore = calcSemColScore(sub.sem_grades, sub.col_grades);
+            
+            // Вывод счета за семинары и коллоквиумы
+            document.getElementById('det-semcol-score').innerText = semColScore.toFixed(1) + ' / 30';
+
+            let sessionRaw = (sub.indep || 0) + semColScore + attScore;
+            let total = Math.round(sessionRaw) + (sub.exam || 0);
             let isDanger = sub.skips > sub.maxSkips;
             
             document.getElementById('det-skips-text').innerText = `${sub.skips} / ${sub.maxSkips}`;
@@ -323,7 +425,8 @@
         }
 
         function deleteSubject() {
-            tg.showConfirm("Fənni silmək istədiyinizə əminsiniz?", function(res) {
+            let msg = currentLang === 'az' ? "Fənni silmək istədiyinizə əminsiniz?" : "Удалить этот предмет?";
+            tg.showConfirm(msg, function(res) {
                 if(res) {
                     subjects = subjects.filter(s => s.id !== currentSubjId);
                     saveDb();
@@ -332,7 +435,9 @@
             });
         }
 
-        renderHome();
+        // Инициализация языка при старте
+        setLang(currentLang);
+
     </script>
 </body>
 </html>
