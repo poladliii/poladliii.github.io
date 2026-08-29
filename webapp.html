@@ -221,6 +221,14 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+\        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    input.blur(); 
+                }
+            });
+        });
+
         // 1. Управление языком
         let currentLang = localStorage.getItem('bdu_lang') || 'az';
 
@@ -437,6 +445,7 @@
 
         // Инициализация языка при старте
         setLang(currentLang);
+        
 
     </script>
 </body>
