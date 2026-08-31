@@ -57,17 +57,15 @@
         }
 
         .lang-ru { display: none; }
-
-        /* Лоадер для облака */
         #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- ЭКРАН ЗАГРУЗКИ (Пока данные тянутся из облака) -->
+    <!-- ЭКРАН ЗАГРУЗКИ -->
     <div id="loader" class="screen active">
         <i class="fa-solid fa-cloud-arrow-down fa-bounce text-4xl mb-4" style="color: var(--btn-color);"></i>
-        <p class="font-bold opacity-70">Buluddan yüklənir...<br>(Загрузка из облака)</p>
+        <p class="font-bold opacity-70">Buluddan yüklənir...<br>(Загрузка...)</p>
     </div>
 
     <!-- ЭКРАН 1: ГЛАВНАЯ (Список предметов) -->
@@ -230,31 +228,83 @@
         let subjects = [];
         let currentSubjId = null;
 
-        // 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ ИЗ ОБЛАКА TELEGRAM
+        // --- УМНАЯ ЗАГРУЗКА ДАННЫХ ---
         function initApp() {
             setLang(currentLang);
             
-            tg.CloudStorage.getItem('bdu_cloud_subjects', function(err, value) {
-                if (!err && value) {
-                    try {
-                        subjects = JSON.parse(value);
-                    } catch (e) {
-                        subjects = [];
+            let loaded = false;
+            
+            // Запасной план: если облако не ответило за 1.5 секунды, берем данные из памяти телефона
+            let fallbackTimer = setTimeout(function() {
+                if (!loaded) {
+                    loaded = true;
+                    loadFromLocal();
+                    finishLoading();
+                }
+            }, 1500);
+
+            if (tg.CloudStorage) {
+                try {
+                    tg.CloudStorage.getItem('bdu_cloud_subjects', function(err, value) {
+                        if (loaded) return; 
+                        loaded = true;
+                        clearTimeout(fallbackTimer);
+                        
+                        if (!err && value) {
+                            try {
+                                subjects = JSON.parse(value);
+                            } catch (e) {
+                                loadFromLocal();
+                            }
+                        } else {
+                            loadFromLocal();
+                        }
+                        finishLoading();
+                    });
+                } catch(e) {
+                    if (!loaded) {
+                        loaded = true;
+                        clearTimeout(fallbackTimer);
+                        loadFromLocal();
+                        finishLoading();
                     }
                 }
-                // Прячем лоадер, показываем главный экран
-                document.getElementById('loader').classList.remove('active');
-                showScreen('screen-home');
-            });
+            } else {
+                loaded = true;
+                clearTimeout(fallbackTimer);
+                loadFromLocal();
+                finishLoading();
+            }
         }
 
-        // 2. СОХРАНЕНИЕ ДАННЫХ В ОБЛАКО TELEGRAM
+        function loadFromLocal() {
+            let localData = localStorage.getItem('bdu_subjects');
+            if (localData) {
+                try {
+                    subjects = JSON.parse(localData);
+                } catch(e) { subjects = []; }
+            }
+        }
+
+        function finishLoading() {
+            document.getElementById('loader').classList.remove('active');
+            showScreen('screen-home');
+        }
+
+        // --- ДВОЙНОЕ СОХРАНЕНИЕ (И В ОБЛАКО, И В ТЕЛЕФОН) ---
         function saveDb() {
-            tg.CloudStorage.setItem('bdu_cloud_subjects', JSON.stringify(subjects), function(err, success) {
-                if (err) {
-                    console.error("Ошибка сохранения в облако:", err);
-                }
-            });
+            let dataStr = JSON.stringify(subjects);
+            
+            // 1. Сохраняем локально (чтобы работало моментально)
+            localStorage.setItem('bdu_subjects', dataStr);
+            
+            // 2. Сохраняем в облако (для надежности и синхронизации)
+            if (tg.CloudStorage) {
+                try {
+                    tg.CloudStorage.setItem('bdu_cloud_subjects', dataStr);
+                } catch(e) {}
+            }
+            
             renderHome();
         }
 
@@ -461,7 +511,7 @@
             }
         });
 
-        // ЗАПУСК ПРИЛОЖЕНИЯ
+        // ЗАПУСК
         initApp();
     </script>
 </body>
