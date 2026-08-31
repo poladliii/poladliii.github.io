@@ -44,11 +44,7 @@
             opacity: 0.8;
         }
         
-        .tg-input:focus {
-            border-color: var(--btn-color);
-            opacity: 1;
-        }
-
+        .tg-input:focus { border-color: var(--btn-color); opacity: 1; }
         .progress-bar { background-color: var(--bg-color); border-radius: 8px; overflow: hidden; height: 8px; width: 100%; }
         .progress-fill { height: 100%; background-color: var(--btn-color); border-radius: 8px; transition: width 0.3s ease; }
         
@@ -61,12 +57,21 @@
         }
 
         .lang-ru { display: none; }
+
+        /* Лоадер для облака */
+        #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
     </style>
 </head>
 <body>
 
+    <!-- ЭКРАН ЗАГРУЗКИ (Пока данные тянутся из облака) -->
+    <div id="loader" class="screen active">
+        <i class="fa-solid fa-cloud-arrow-down fa-bounce text-4xl mb-4" style="color: var(--btn-color);"></i>
+        <p class="font-bold opacity-70">Buluddan yüklənir...<br>(Загрузка из облака)</p>
+    </div>
+
     <!-- ЭКРАН 1: ГЛАВНАЯ (Список предметов) -->
-    <div id="screen-home" class="screen active p-4">
+    <div id="screen-home" class="screen p-4">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-extrabold">
                 <span class="lang-az">Fənlərim 📚</span>
@@ -109,7 +114,6 @@
                     <span class="lang-az">Saatlar</span><span class="lang-ru">Часы</span>
                 </label>
                 
-                <!-- ДОБАВЛЕНЫ КНОПКИ 90, 105, 120 -->
                 <div class="grid grid-cols-4 gap-2 mb-2">
                     <button onclick="document.getElementById('add-hours').value=30" class="tg-card py-2 text-sm font-bold text-center active:scale-95">30</button>
                     <button onclick="document.getElementById('add-hours').value=45" class="tg-card py-2 text-sm font-bold text-center active:scale-95">45</button>
@@ -223,6 +227,36 @@
         tg.expand();
 
         let currentLang = localStorage.getItem('bdu_lang') || 'az';
+        let subjects = [];
+        let currentSubjId = null;
+
+        // 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ ИЗ ОБЛАКА TELEGRAM
+        function initApp() {
+            setLang(currentLang);
+            
+            tg.CloudStorage.getItem('bdu_cloud_subjects', function(err, value) {
+                if (!err && value) {
+                    try {
+                        subjects = JSON.parse(value);
+                    } catch (e) {
+                        subjects = [];
+                    }
+                }
+                // Прячем лоадер, показываем главный экран
+                document.getElementById('loader').classList.remove('active');
+                showScreen('screen-home');
+            });
+        }
+
+        // 2. СОХРАНЕНИЕ ДАННЫХ В ОБЛАКО TELEGRAM
+        function saveDb() {
+            tg.CloudStorage.setItem('bdu_cloud_subjects', JSON.stringify(subjects), function(err, success) {
+                if (err) {
+                    console.error("Ошибка сохранения в облако:", err);
+                }
+            });
+            renderHome();
+        }
 
         function setLang(lang) {
             currentLang = lang;
@@ -234,11 +268,8 @@
             document.querySelectorAll('.lang-az').forEach(el => el.style.display = lang === 'az' ? 'inline' : 'none');
             document.querySelectorAll('.lang-ru').forEach(el => el.style.display = lang === 'ru' ? 'inline' : 'none');
             
-            renderHome();
+            if (document.getElementById('screen-home').classList.contains('active')) renderHome();
         }
-
-        let subjects = JSON.parse(localStorage.getItem('bdu_subjects')) || [];
-        let currentSubjId = null;
 
         function calcMaxSkips(hours) {
             if (hours === 120) return 14; if (hours === 105) return 13; if (hours === 90) return 11;
@@ -265,11 +296,6 @@
             let avg = sum / allGrades.length;
             let score = avg * 3;
             return Math.min(30, score);
-        }
-
-        function saveDb() {
-            localStorage.setItem('bdu_subjects', JSON.stringify(subjects));
-            renderHome();
         }
 
         function showScreen(id) {
@@ -428,15 +454,15 @@
             });
         }
 
-        // --- ГЛОБАЛЬНЫЙ ПЕРЕХВАТЧИК ДЛЯ СКРЫТИЯ КЛАВИАТУРЫ ---
-        // Сработает на абсолютно любом поле ввода при нажатии Enter
+        // АВТОМАТИЧЕСКОЕ СКРЫТИЕ КЛАВИАТУРЫ
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && e.target.tagName.toLowerCase() === 'input') {
-                e.target.blur(); // Мгновенно скрывает клавиатуру
+                e.target.blur(); 
             }
         });
 
-        setLang(currentLang);
+        // ЗАПУСК ПРИЛОЖЕНИЯ
+        initApp();
     </script>
 </body>
 </html>
