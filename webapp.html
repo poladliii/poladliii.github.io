@@ -51,13 +51,16 @@
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
 
+        /* ИСПРАВЛЕНИЕ БАГА С ЛОАДЕРОМ: теперь он flex только когда активен */
+        #loader { flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        #loader.active { display: flex; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .lang-ru { display: none; }
-        #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
     </style>
 </head>
 <body>
@@ -224,65 +227,49 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Язык сохраняем в localStorage (это настройки интерфейса, они не влияют на данные предметов)
         let currentLang = localStorage.getItem('bdu_lang') || 'az';
+        
         let subjects = [];
         let currentSubjId = null;
 
-        // --- УМНАЯ ЗАГРУЗКА ДАННЫХ ---
+        // --- ТОЛЬКО ОБЛАЧНАЯ ЗАГРУЗКА ---
         function initApp() {
             setLang(currentLang);
             
             let loaded = false;
             
-            // Запасной план: если облако не ответило за 1.5 секунды, берем данные из памяти телефона
-            let fallbackTimer = setTimeout(function() {
+            // Если облако зависнет, через 2 секунды пускаем пользователя с пустой базой
+            let timeout = setTimeout(function() {
                 if (!loaded) {
                     loaded = true;
-                    loadFromLocal();
+                    subjects = [];
                     finishLoading();
                 }
-            }, 1500);
+            }, 2000);
 
             if (tg.CloudStorage) {
-                try {
-                    tg.CloudStorage.getItem('bdu_cloud_subjects', function(err, value) {
-                        if (loaded) return; 
-                        loaded = true;
-                        clearTimeout(fallbackTimer);
-                        
-                        if (!err && value) {
-                            try {
-                                subjects = JSON.parse(value);
-                            } catch (e) {
-                                loadFromLocal();
-                            }
-                        } else {
-                            loadFromLocal();
+                tg.CloudStorage.getItem('bdu_cloud_subjects', function(err, value) {
+                    if (loaded) return; 
+                    loaded = true;
+                    clearTimeout(timeout);
+                    
+                    if (!err && value) {
+                        try {
+                            subjects = JSON.parse(value);
+                        } catch (e) {
+                            subjects = [];
                         }
-                        finishLoading();
-                    });
-                } catch(e) {
-                    if (!loaded) {
-                        loaded = true;
-                        clearTimeout(fallbackTimer);
-                        loadFromLocal();
-                        finishLoading();
+                    } else {
+                        subjects = [];
                     }
-                }
+                    finishLoading();
+                });
             } else {
                 loaded = true;
-                clearTimeout(fallbackTimer);
-                loadFromLocal();
+                clearTimeout(timeout);
+                subjects = [];
                 finishLoading();
-            }
-        }
-
-        function loadFromLocal() {
-            let localData = localStorage.getItem('bdu_subjects');
-            if (localData) {
-                try {
-                    subjects = JSON.parse(localData);
-                } catch(e) { subjects = []; }
             }
         }
 
@@ -291,20 +278,15 @@
             showScreen('screen-home');
         }
 
-        // --- ДВОЙНОЕ СОХРАНЕНИЕ (И В ОБЛАКО, И В ТЕЛЕФОН) ---
+        // --- СОХРАНЕНИЕ ТОЛЬКО В ОБЛАКО ---
         function saveDb() {
-            let dataStr = JSON.stringify(subjects);
-            
-            // 1. Сохраняем локально (чтобы работало моментально)
-            localStorage.setItem('bdu_subjects', dataStr);
-            
-            // 2. Сохраняем в облако (для надежности и синхронизации)
             if (tg.CloudStorage) {
                 try {
-                    tg.CloudStorage.setItem('bdu_cloud_subjects', dataStr);
-                } catch(e) {}
+                    tg.CloudStorage.setItem('bdu_cloud_subjects', JSON.stringify(subjects));
+                } catch(e) {
+                    console.error("Bulud xətası / Ошибка облака:", e);
+                }
             }
-            
             renderHome();
         }
 
